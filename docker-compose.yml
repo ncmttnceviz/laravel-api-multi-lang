@@ -1,0 +1,46 @@
+version: "2"
+services:
+    app:
+        build: .
+        container_name: "${APP_NAME}_app"
+        environment:
+            DB_CONNECTION: pgsql
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_DATABASE: "${DB_DATABASE}"
+            DB_USERNAME: "${DB_USERNAME}"
+            DB_PASSWORD: "${DB_PASSWORD}"
+            REDIS_HOST: redis
+            REDIS_PASSWORD: "${REDIS_PASSWORD}"
+            REDIS_PORT: 6379
+            REDIS_DB: 0
+            REDIS_CACHE_DB: 1
+            REDIS_CLIENT: predis
+        depends_on:
+            - db
+        links:
+            - db
+        networks:
+            - apps
+        ports:
+            - 8000:80
+        volumes:
+            - .:/var/www/html
+    db:
+        container_name: "${APP_NAME}_postgres"
+        image: postgres
+        ports:
+            - 8001:5432
+        volumes:
+            - data:/var/lib/postgresql/data
+        networks:
+            - apps
+        environment:
+            POSTGRES_DB: "${DB_DATABASE}"
+            POSTGRES_USER: "${DB_USERNAME}"
+            POSTGRES_PASSWORD: "${DB_PASSWORD}"
+networks:
+    apps:
+volumes:
+    data:
+        driver: local
